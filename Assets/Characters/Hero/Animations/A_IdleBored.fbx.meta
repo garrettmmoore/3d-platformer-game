@@ -1,11 +1,11 @@
 fileFormatVersion: 2
-guid: b69d15eae6c262c4aa9bbee165e5ccdc
+guid: 5765b0a69b42c044199fea28749f7f43
 ModelImporter:
   serializedVersion: 21300
   internalIDToNameTable:
   - first:
       74: -203655887218126122
-    second: Landing
+    second: IdleBored
   externalObjects: {}
   materials:
     materialImportMode: 2
@@ -36,19 +36,19 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Landing
+      name: IdleBored
       takeName: mixamo.com
       internalID: 0
-      firstFrame: 8
-      lastFrame: 32
+      firstFrame: 0
+      lastFrame: 242
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
+      loopTime: 1
+      loopBlend: 1
       loopBlendOrientation: 1
       loopBlendPositionY: 1
       loopBlendPositionXZ: 1
