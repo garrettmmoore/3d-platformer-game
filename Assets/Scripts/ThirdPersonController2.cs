@@ -2,12 +2,23 @@ using UnityEngine;
 
 public class ThirdPersonController2 : MonoBehaviour
 {
-    [SerializeField] private float rotationSpeed;
-    [SerializeField] private float jumpSpeed;
-    [SerializeField] private float jumpButtonGracePeriod;
-    [SerializeField] private Transform cameraTransform;
-    [SerializeField] private float jumpHorizontalSpeed;
-    [SerializeField] private float fallDistance;
+    [SerializeField]
+    private Transform cameraTransform;
+
+    [SerializeField]
+    private float rotationSpeed;
+
+    [SerializeField]
+    private float jumpSpeed;
+
+    [SerializeField]
+    private float jumpButtonGracePeriod;
+
+    [SerializeField]
+    private float jumpHorizontalSpeed;
+
+    [SerializeField]
+    private float fallDistance;
 
     private Animator _animator;
     private CharacterController _characterController;
@@ -17,8 +28,7 @@ public class ThirdPersonController2 : MonoBehaviour
     private float? _jumpButtonPressedTime;
     private bool _isJumping;
     private bool _isGrounded;
-    // private bool isFalling;
-    
+
     // Animator parameters
     private static readonly int InputMagnitude = Animator.StringToHash("InputMagnitude");
     private static readonly int IsMoving = Animator.StringToHash("IsMoving");
@@ -89,18 +99,17 @@ public class ThirdPersonController2 : MonoBehaviour
             _characterController.stepOffset = 0;
             _animator.SetBool(IsGrounded, false);
             _isGrounded = false;
-            
+
             // Check if player is falling
             var isFalling = _isJumping && _ySpeed < 0;
             var isFallingFromPlatform = CheckIfFalling();
-            
+
             // We don't want this to happen when player is going down hill or stairs
             // if (isFalling && isFallingFromPlatform)
             if (isFalling && isFallingFromPlatform)
             {
                 _animator.SetBool(IsFalling, true);
             }
-
         }
 
         if (movementDirection != Vector3.zero)
@@ -108,8 +117,11 @@ public class ThirdPersonController2 : MonoBehaviour
             _animator.SetBool(IsMoving, true);
 
             Quaternion toRotation = Quaternion.LookRotation(movementDirection, Vector3.up);
-
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
+            transform.rotation = Quaternion.RotateTowards(
+                transform.rotation,
+                toRotation,
+                rotationSpeed * Time.deltaTime
+            );
         }
         else
         {
@@ -121,29 +133,29 @@ public class ThirdPersonController2 : MonoBehaviour
             // Check if player is falling
             // var isFalling = _isJumping && _ySpeed < 0;
             var isFallingFromPlatform = CheckIfFalling();
-            
+
             // We don't want this to happen when player is going down hill or stairs
             // if (isFalling && isFallingFromPlatform)
             if (_ySpeed < 0 && isFallingFromPlatform)
             {
                 _animator.SetBool(IsFalling, true);
             }
-            
+
             Vector3 velocity = movementDirection * (inputMagnitude * jumpHorizontalSpeed);
             velocity.y = _ySpeed;
 
             _characterController.Move(velocity * Time.deltaTime);
         }
     }
-    
+
     private bool CheckIfFalling()
     {
         Transform transform1 = transform;
         Vector3 position = transform1.position;
         Vector3 up = transform1.up;
         var ray = new Ray(position, -up);
-        Debug.DrawRay(position, -up);
-        return (!Physics.Raycast(ray, out RaycastHit hit, fallDistance) && (_ySpeed <= 0));
+        Debug.DrawRay(position, -up, Color.green);
+        return !Physics.Raycast(ray, out RaycastHit hit, fallDistance) && _ySpeed <= 0;
     }
 
     private void OnAnimatorMove()
