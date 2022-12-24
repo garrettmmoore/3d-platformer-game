@@ -47,18 +47,17 @@ public class ThirdPersonController2 : MonoBehaviour
     {
         var horizontalInput = Input.GetAxis("Horizontal");
         var verticalInput = Input.GetAxis("Vertical");
-
         var movementDirection = new Vector3(horizontalInput, 0, verticalInput);
-        var inputMagnitude = Mathf.Clamp01(movementDirection.magnitude);
-        
-        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-        {
-            inputMagnitude /= 2;
-        }
 
+        // Reflect the movement of the thumbstick (how far it's tilted) and ensure value doesn't exceed 1
+        var inputMagnitude = Mathf.Clamp01(movementDirection.magnitude);
+
+        // Update the animation transition based on movement of the thumbstick
         _animator.SetFloat(InputMagnitude, inputMagnitude, 0.05f, Time.deltaTime);
 
         movementDirection = Quaternion.AngleAxis(cameraTransform.rotation.eulerAngles.y, Vector3.up) * movementDirection;
+
+        // We normalize the vector as a direction vector should have a magnitude of 1
         movementDirection.Normalize();
 
         _ySpeed += Physics.gravity.y * Time.deltaTime;
@@ -73,23 +72,28 @@ public class ThirdPersonController2 : MonoBehaviour
             _jumpButtonPressedTime = Time.time;
         }
 
+        var hasGroundedRecently = Time.time - _lastGroundedTime <= jumpButtonGracePeriod;
+        var hasJumpedRecently = Time.time - _jumpButtonPressedTime <= jumpButtonGracePeriod;
+
         // Check if player has been grounded recently
-        if (Time.time - _lastGroundedTime <= jumpButtonGracePeriod)
+        if (hasGroundedRecently)
         {
             _characterController.stepOffset = _originalStepOffset;
             _ySpeed = -0.5f;
-            _animator.SetBool(IsGrounded, true);
+            
             _isGrounded = true;
-            _animator.SetBool(IsJumping, false);
+            _animator.SetBool(IsGrounded, _isGrounded);
+            
             _isJumping = false;
-            _animator.SetBool(IsFalling, false);
+            _animator.SetBool(IsJumping, _isJumping);
+            _animator.SetBool(IsFalling, _isJumping);
 
             // Check if player has jumped recently
-            if (Time.time - _jumpButtonPressedTime <= jumpButtonGracePeriod)
+            if (hasJumpedRecently)
             {
                 _ySpeed = jumpSpeed;
-                _animator.SetBool(IsJumping, true);
                 _isJumping = true;
+                _animator.SetBool(IsJumping, _isJumping);
                 _jumpButtonPressedTime = null;
                 _lastGroundedTime = null;
             }
@@ -97,45 +101,29 @@ public class ThirdPersonController2 : MonoBehaviour
         else
         {
             _characterController.stepOffset = 0;
-            _animator.SetBool(IsGrounded, false);
             _isGrounded = false;
+            _animator.SetBool(IsGrounded, _isGrounded);
 
             // Check if player is falling
             var isFalling = _isJumping && _ySpeed < 0;
             var isFallingFromPlatform = CheckIfFalling();
 
             // We don't want this to happen when player is going down hill or stairs
-            // if (isFalling && isFallingFromPlatform)
             if (isFalling && isFallingFromPlatform)
             {
                 _animator.SetBool(IsFalling, true);
             }
         }
 
-        if (movementDirection != Vector3.zero)
-        {
-            _animator.SetBool(IsMoving, true);
-
-            Quaternion toRotation = Quaternion.LookRotation(movementDirection, Vector3.up);
-            transform.rotation = Quaternion.RotateTowards(
-                transform.rotation,
-                toRotation,
-                rotationSpeed * Time.deltaTime
-            );
-        }
-        else
-        {
-            _animator.SetBool(IsMoving, false);
-        }
+        // Turn/rotate the character to face the direction it's moving
+        HandleCharacterRotation(movementDirection);
 
         if (_isGrounded == false)
         {
             // Check if player is falling
-            // var isFalling = _isJumping && _ySpeed < 0;
             var isFallingFromPlatform = CheckIfFalling();
 
             // We don't want this to happen when player is going down hill or stairs
-            // if (isFalling && isFallingFromPlatform)
             if (_ySpeed < 0 && isFallingFromPlatform)
             {
                 _animator.SetBool(IsFalling, true);
@@ -143,8 +131,24 @@ public class ThirdPersonController2 : MonoBehaviour
 
             Vector3 velocity = movementDirection * (inputMagnitude * jumpHorizontalSpeed);
             velocity.y = _ySpeed;
-
             _characterController.Move(velocity * Time.deltaTime);
+        }
+    }
+
+    private void HandleCharacterRotation(Vector3 movementDirection)
+    {
+        if (movementDirection != Vector3.zero)
+        {
+            _animator.SetBool(IsMoving, true);
+
+            // Smoothly change the rotation of the character
+            Quaternion toRotation = Quaternion.LookRotation(movementDirection, Vector3.up);
+            var maxDegrees = rotationSpeed * Time.deltaTime;
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, maxDegrees);
+        }
+        else
+        {
+            _animator.SetBool(IsMoving, false);
         }
     }
 
