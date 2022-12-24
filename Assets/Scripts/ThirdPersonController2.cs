@@ -47,6 +47,8 @@ public class ThirdPersonController2 : MonoBehaviour
     {
         var horizontalInput = Input.GetAxis("Horizontal");
         var verticalInput = Input.GetAxis("Vertical");
+        
+        // Determine the direction of movement along the x and z axis
         var movementDirection = new Vector3(horizontalInput, 0, verticalInput);
 
         // Reflect the movement of the thumbstick (how far it's tilted) and ensure value doesn't exceed 1
@@ -62,11 +64,35 @@ public class ThirdPersonController2 : MonoBehaviour
 
         _ySpeed += Physics.gravity.y * Time.deltaTime;
 
+        HandleCharacterJump();
+
+        // Turn/rotate the character to face the direction it's moving
+        HandleCharacterRotation(movementDirection);
+
+        if (_isGrounded == false)
+        {
+            // Check if player is falling
+            var isFallingFromPlatform = CheckIfFalling();
+
+            // We don't want this to happen when player is going down hill or stairs
+            if (_ySpeed < 0 && isFallingFromPlatform)
+            {
+                _animator.SetBool(IsFalling, true);
+            }
+
+            Vector3 velocity = movementDirection * (inputMagnitude * jumpHorizontalSpeed);
+            velocity.y = _ySpeed;
+            _characterController.Move(velocity * Time.deltaTime);
+        }
+    }
+
+    private void HandleCharacterJump()
+    {
         if (_characterController.isGrounded)
         {
             _lastGroundedTime = Time.time;
         }
-
+        
         if (Input.GetButtonDown("Jump"))
         {
             _jumpButtonPressedTime = Time.time;
@@ -80,10 +106,10 @@ public class ThirdPersonController2 : MonoBehaviour
         {
             _characterController.stepOffset = _originalStepOffset;
             _ySpeed = -0.5f;
-            
+
             _isGrounded = true;
             _animator.SetBool(IsGrounded, _isGrounded);
-            
+
             _isJumping = false;
             _animator.SetBool(IsJumping, _isJumping);
             _animator.SetBool(IsFalling, _isJumping);
@@ -113,25 +139,6 @@ public class ThirdPersonController2 : MonoBehaviour
             {
                 _animator.SetBool(IsFalling, true);
             }
-        }
-
-        // Turn/rotate the character to face the direction it's moving
-        HandleCharacterRotation(movementDirection);
-
-        if (_isGrounded == false)
-        {
-            // Check if player is falling
-            var isFallingFromPlatform = CheckIfFalling();
-
-            // We don't want this to happen when player is going down hill or stairs
-            if (_ySpeed < 0 && isFallingFromPlatform)
-            {
-                _animator.SetBool(IsFalling, true);
-            }
-
-            Vector3 velocity = movementDirection * (inputMagnitude * jumpHorizontalSpeed);
-            velocity.y = _ySpeed;
-            _characterController.Move(velocity * Time.deltaTime);
         }
     }
 
@@ -172,6 +179,10 @@ public class ThirdPersonController2 : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Hide the mouse cursor when the application gets focused
+    /// </summary>
+    /// <param name="focus"></param>
     private void OnApplicationFocus(bool focus)
     {
         Cursor.lockState = focus ? CursorLockMode.Locked : CursorLockMode.None;
