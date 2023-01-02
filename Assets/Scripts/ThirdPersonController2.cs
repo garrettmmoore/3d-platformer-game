@@ -98,7 +98,10 @@ public class ThirdPersonController2 : MonoBehaviour
             _jumpButtonPressedTime = Time.time;
         }
 
+        // The time that has passed since character has been on the ground
         var hasGroundedRecently = Time.time - _lastGroundedTime <= jumpButtonGracePeriod;
+        
+        // The time that has passed since the jump button has been pressed
         var hasJumpedRecently = Time.time - _jumpButtonPressedTime <= jumpButtonGracePeriod;
 
         // Check if player has been grounded recently
