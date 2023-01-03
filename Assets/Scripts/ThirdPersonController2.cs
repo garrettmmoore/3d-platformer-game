@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class ThirdPersonController2 : MonoBehaviour
@@ -9,7 +10,10 @@ public class ThirdPersonController2 : MonoBehaviour
     private float rotationSpeed;
 
     [SerializeField]
-    private float jumpSpeed;
+    private float jumpHeight;
+
+    [SerializeField]
+    private float gravityMultiplier;
 
     [SerializeField]
     private float jumpButtonGracePeriod;
@@ -58,13 +62,26 @@ public class ThirdPersonController2 : MonoBehaviour
         _animator.SetFloat(InputMagnitude, inputMagnitude, 0.05f, Time.deltaTime);
 
         movementDirection = Quaternion.AngleAxis(cameraTransform.rotation.eulerAngles.y, Vector3.up) * movementDirection;
-
         // We normalize the vector as a direction vector should have a magnitude of 1
         movementDirection.Normalize();
 
-        _ySpeed += Physics.gravity.y * Time.deltaTime;
+        if (Input.GetButton("CameraRecenter"))
+        {
+            Debug.Log("Camera Recenter!");
+            
+        }
 
-        HandleCharacterJump();
+        // Implement gravity to make the jump less floaty
+        var gravity = Physics.gravity.y * gravityMultiplier;
+
+        // Increase the gravity if the jump button is released
+        if (_isJumping && _ySpeed > 0 && Input.GetButton("Jump") == false)
+        {
+            gravity *= 2;
+        }
+        _ySpeed += gravity * Time.deltaTime;
+        
+        HandleCharacterJump(gravity);
 
         // Turn/rotate the character to face the direction it's moving
         HandleCharacterRotation(movementDirection);
@@ -86,7 +103,7 @@ public class ThirdPersonController2 : MonoBehaviour
         }
     }
 
-    private void HandleCharacterJump()
+    private void HandleCharacterJump(float gravity)
     {
         if (_characterController.isGrounded)
         {
@@ -120,9 +137,14 @@ public class ThirdPersonController2 : MonoBehaviour
             // Check if player has jumped recently
             if (hasJumpedRecently)
             {
-                _ySpeed = jumpSpeed;
+                // Takes the height and gravity value and returns the required speed needed
+                // to reach the desired height
+                var requiredSpeed = Mathf.Sqrt(jumpHeight * -3 * gravity);
+                _ySpeed = requiredSpeed;
+                
                 _isJumping = true;
                 _animator.SetBool(IsJumping, _isJumping);
+                
                 _jumpButtonPressedTime = null;
                 _lastGroundedTime = null;
             }
