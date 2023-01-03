@@ -13,7 +13,7 @@ public class CameraRecenter : MonoBehaviour
     {
         _camera = GetComponent<CinemachineFreeLook>();
     }
-    
+
     private void Update()
     {
         // If left ctrl or right trigger has been pressed
