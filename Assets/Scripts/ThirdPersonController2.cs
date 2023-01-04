@@ -32,6 +32,8 @@ public class ThirdPersonController2 : MonoBehaviour
     private float? _jumpButtonPressedTime;
     private bool _isJumping;
     private bool _isGrounded;
+    private bool _isSliding;
+    private Vector3 _slopeSlideVelocity;
 
     // Animator parameters
     private static readonly int InputMagnitude = Animator.StringToHash("InputMagnitude");
@@ -51,7 +53,7 @@ public class ThirdPersonController2 : MonoBehaviour
     {
         var horizontalInput = Input.GetAxis("Horizontal");
         var verticalInput = Input.GetAxis("Vertical");
-        
+
         // Determine the direction of movement along the x and z axis
         var movementDirection = new Vector3(horizontalInput, 0, verticalInput);
 
@@ -65,12 +67,6 @@ public class ThirdPersonController2 : MonoBehaviour
         // We normalize the vector as a direction vector should have a magnitude of 1
         movementDirection.Normalize();
 
-        if (Input.GetButton("CameraRecenter"))
-        {
-            Debug.Log("Camera Recenter!");
-            
-        }
-
         // Implement gravity to make the jump less floaty
         var gravity = Physics.gravity.y * gravityMultiplier;
 
@@ -79,14 +75,21 @@ public class ThirdPersonController2 : MonoBehaviour
         {
             gravity *= 2;
         }
+
         _ySpeed += gravity * Time.deltaTime;
-        
+        SetSlopeSlideVelocity();
+
+        if (_slopeSlideVelocity == Vector3.zero)
+        {
+            _isSliding = false;
+        }
+
         HandleCharacterJump(gravity);
 
         // Turn/rotate the character to face the direction it's moving
         HandleCharacterRotation(movementDirection);
 
-        if (_isGrounded == false)
+        if (_isGrounded == false && _isSliding == false)
         {
             // Check if player is falling
             var isFallingFromPlatform = CheckIfFalling();
@@ -101,6 +104,16 @@ public class ThirdPersonController2 : MonoBehaviour
             velocity.y = _ySpeed;
             _characterController.Move(velocity * Time.deltaTime);
         }
+
+        if (_isSliding)
+        {
+            // make sure the character is still pushing down into the ground
+            Vector3 velocity = _slopeSlideVelocity;
+            velocity.y = _ySpeed;
+            
+            // make sure character moves at the same speed regardless of the framerate
+            _characterController.Move(velocity * Time.deltaTime);
+        }
     }
 
     private void HandleCharacterJump(float gravity)
@@ -109,7 +122,7 @@ public class ThirdPersonController2 : MonoBehaviour
         {
             _lastGroundedTime = Time.time;
         }
-        
+
         if (Input.GetButtonDown("Jump"))
         {
             _jumpButtonPressedTime = Time.time;
@@ -117,15 +130,23 @@ public class ThirdPersonController2 : MonoBehaviour
 
         // The time that has passed since character has been on the ground
         var hasGroundedRecently = Time.time - _lastGroundedTime <= jumpButtonGracePeriod;
-        
+
         // The time that has passed since the jump button has been pressed
-        var hasJumpedRecently = Time.time - _jumpButtonPressedTime <= jumpButtonGracePeriod;
+        var hasJumpedRecently = Time.time - _jumpButtonPressedTime <= jumpButtonGracePeriod && _isSliding == false;
 
         // Check if player has been grounded recently
         if (hasGroundedRecently)
         {
+            if (_slopeSlideVelocity != Vector3.zero)
+            {
+                _isSliding = true;
+            }
+            
             _characterController.stepOffset = _originalStepOffset;
-            _ySpeed = -0.5f;
+            if (_isSliding == false)
+            {
+                _ySpeed = -0.5f;
+            }
 
             _isGrounded = true;
             _animator.SetBool(IsGrounded, _isGrounded);
@@ -141,10 +162,10 @@ public class ThirdPersonController2 : MonoBehaviour
                 // to reach the desired height
                 var requiredSpeed = Mathf.Sqrt(jumpHeight * -3 * gravity);
                 _ySpeed = requiredSpeed;
-                
+
                 _isJumping = true;
                 _animator.SetBool(IsJumping, _isJumping);
-                
+
                 _jumpButtonPressedTime = null;
                 _lastGroundedTime = null;
             }
@@ -196,12 +217,54 @@ public class ThirdPersonController2 : MonoBehaviour
 
     private void OnAnimatorMove()
     {
-        if (_isGrounded)
+        if (_isGrounded && _isSliding == false)
         {
             Vector3 velocity = _animator.deltaPosition;
             velocity.y = _ySpeed * Time.deltaTime;
             _characterController.Move(velocity);
         }
+    }
+
+    /// <summary>
+    /// Set the velocity of the slide when a character slides down a slope
+    /// </summary>
+    private void SetSlopeSlideVelocity()
+    {
+        // Check if there is ground underneath the character via raycast
+        var groundExists = Physics.Raycast(transform.position + Vector3.up, Vector3.down, out RaycastHit hitInfo, 5);
+
+        // We only want to proceed if the raycast hits the ground
+        if (groundExists)
+        {
+            // Vector coming out of the ground's surface
+            Vector3 groundVector = hitInfo.normal;
+            
+            // Get the angle of the slope
+            var angle = Vector3.Angle(groundVector, Vector3.up);
+
+            // Check if the angle of the current slope is greater than the slope limit
+            if (angle >= _characterController.slopeLimit)
+            {
+                var downwardCharacterVelocity = new Vector3(0, _ySpeed, 0);
+                
+                // Slide the character downwards based on the direction the character is facing
+                _slopeSlideVelocity = Vector3.ProjectOnPlane(downwardCharacterVelocity, groundVector);
+                return;
+            }
+        }
+
+        if (_isSliding)
+        {
+            // Bring the slide to a gradual stop
+            _slopeSlideVelocity -= _slopeSlideVelocity * (Time.deltaTime * 3);
+            if (_slopeSlideVelocity.magnitude > 1)
+            {
+                return;
+            }
+        }
+        
+        // If character is not on any ground isn't steep enough to require a slide, set to zero
+        _slopeSlideVelocity = Vector3.zero;
     }
 
     /// <summary>
