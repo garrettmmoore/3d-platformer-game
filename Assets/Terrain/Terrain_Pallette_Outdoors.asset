@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c509dbaa7b6f416409e3195321a2187e, type: 3}
+  m_Name: Terrain_Pallette_Outdoors
+  m_EditorClassIdentifier: 
+  PaletteLayers:
+  - {fileID: 8574412962073106934, guid: 2339f9e297348684699cd3a196e7d0c2, type: 2}
+  - {fileID: 8574412962073106934, guid: b28855514b9a0714ba3f5a43a4cde3fe, type: 2}
+  - {fileID: 8574412962073106934, guid: 9010eafe9e206fc48aa44ddc249571b4, type: 2}
+  - {fileID: 8574412962073106934, guid: 3d9e7154b34b66c4bae9dea2e0c7f311, type: 2}
+  - {fileID: 8574412962073106934, guid: be90d245d4b644147b89df0f3aba8960, type: 2}
+  - {fileID: 8574412962073106934, guid: 113f6e06fafaa69488b817a11e33bd42, type: 2}
+  - {fileID: 8574412962073106934, guid: 1729a256e6e7884449b0d0dbf8bda74d, type: 2}
+  - {fileID: 8574412962073106934, guid: 47095b75dfb5e224693d333acbedd399, type: 2}
