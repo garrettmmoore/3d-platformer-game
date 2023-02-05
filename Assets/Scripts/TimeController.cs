@@ -2,65 +2,66 @@ using System;
 using TMPro;
 using UnityEngine;
 
+/// Control the in-game day/night cycle.
 public class TimeController : MonoBehaviour
 {
-    /// Display the current time.
+    [Tooltip("UI text to display the current time.")]
     [SerializeField]
     private TextMeshProUGUI timeText;
 
-    /// Light representing the sun.
+    [Tooltip("Light to represent the sun.")]
     [SerializeField]
     private Light sunLight;
 
-    /// A light representing the moon.
+    [Tooltip("Light to represent the moon.")]
     [SerializeField]
     private Light moonLight;
 
-    /// Hour when the sun rises.
-    /// Ambient light color during the day.
+    [Tooltip("Ambient light color during the day.")]
     [SerializeField]
     private Color dayAmbientLight;
 
-    /// Ambient light color during the night.
+    [Tooltip("Ambient light color during the night.")]
     [SerializeField]
     private Color nightAmbientLight;
 
-    /// Transition between the ambient light colors smoothly.
+    [Tooltip("Smooth the transition between day and night ambient light colors.")]
     [SerializeField]
     private AnimationCurve lightChangeCurve;
 
-    /// Maximum intensity of the sun light during the day..
+    [Tooltip("Maximum intensity of the sun light during the day.")]
     [SerializeField]
     public float maxSunLightIntensity;
 
-    /// Maximum intensity of the moon light at night.
+    [Tooltip("Maximum intensity of the moon light at night.")]
     [SerializeField]
     public float maxMoonLightIntensity;
 
+    [Tooltip("Hour when the sun rises.")]
     [SerializeField]
     private float sunriseHour;
 
-    /// Hour when the sun sets.
+    [Tooltip("Hour when the sun sets.")]
     [SerializeField]
     private float sunsetHour;
 
-    /// Hour we want the game to start at.
+    [Tooltip("Hour we want the game to start at.")]
     [SerializeField]
     private float startHour;
 
-    /// Controls how fast time flows in the game.
+    [Tooltip("Control how fast time flows in the game.")]
     [SerializeField]
     private float timeMultiplier;
 
-    /// Time when the sun sets.
-    private TimeSpan _sunsetTime;
+    /// Keep track of the current time.
+    private DateTime _currentTime;
 
     /// Time when the sun rises.
     private TimeSpan _sunriseTime;
 
-    /// Keep track of the current time.
-    private DateTime _currentTime;
-    
+    /// Time when the sun sets.
+    private TimeSpan _sunsetTime;
+
     private void Start()
     {
         _currentTime = DateTime.Now.Date + TimeSpan.FromHours(startHour);
@@ -122,18 +123,15 @@ public class TimeController : MonoBehaviour
             sunLightRotation = Mathf.Lerp(180, 360, (float)percentage);
         }
 
-        // Apply the rotation to the sun light
-        // Pass in vector3.right to have it rotate on the x-axis
+        // Apply rotation to the sunlight and use Vector3.right to rotate on the x-axis
         sunLight.transform.rotation = Quaternion.AngleAxis(sunLightRotation, Vector3.right);
     }
 
-    /// Change between daytime and nighttime settings
+    /// Update sun and moon light settings to create a non-linear transition of light.
     private void UpdateLightSettings()
     {
         // Get value between -1 and 1 and if sun is pointing down we get 1, horizontal we get 0, up we get -1
         var dotProduct = Vector3.Dot(sunLight.transform.forward, Vector3.down);
-
-        // Create a non-linear transition of the light 
 
         // Adjust the intensity of the sun by transitioning off (0 -> max)
         sunLight.intensity = Mathf.Lerp(0, maxSunLightIntensity, lightChangeCurve.Evaluate(dotProduct));
@@ -146,8 +144,8 @@ public class TimeController : MonoBehaviour
     }
 
     /// Calculate the difference between times to determine how long until sunset or sunrise.
-    /// <param name="fromTime"> </param>
-    /// <param name="toTime"> </param>
+    /// <param name="fromTime"> Value can be sunriseTime or sunsetTime </param>
+    /// <param name="toTime"> Value can be sunsetTime, sunriseTime, or current time of day </param>
     /// <returns> The difference of the two given times. </returns>
     private TimeSpan CalculateTimeDifference(TimeSpan fromTime, TimeSpan toTime)
     {
@@ -161,6 +159,4 @@ public class TimeController : MonoBehaviour
 
         return difference;
     }
-    
-    
 }
