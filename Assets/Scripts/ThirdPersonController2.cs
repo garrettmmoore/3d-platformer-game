@@ -1,8 +1,14 @@
-using System;
 using UnityEngine;
 
 public class ThirdPersonController2 : MonoBehaviour
 {
+    // Animator parameters
+    private static readonly int InputMagnitude = Animator.StringToHash("InputMagnitude");
+    private static readonly int IsMoving = Animator.StringToHash("IsMoving");
+    private static readonly int IsJumping = Animator.StringToHash("IsJumping");
+    private static readonly int IsGrounded = Animator.StringToHash("IsGrounded");
+    private static readonly int IsFalling = Animator.StringToHash("IsFalling");
+
     [SerializeField]
     private Transform cameraTransform;
 
@@ -26,21 +32,14 @@ public class ThirdPersonController2 : MonoBehaviour
 
     private Animator _animator;
     private CharacterController _characterController;
-    private float _ySpeed;
-    private float _originalStepOffset;
-    private float? _lastGroundedTime;
-    private float? _jumpButtonPressedTime;
-    private bool _isJumping;
     private bool _isGrounded;
+    private bool _isJumping;
     private bool _isSliding;
+    private float? _jumpButtonPressedTime;
+    private float? _lastGroundedTime;
+    private float _originalStepOffset;
     private Vector3 _slopeSlideVelocity;
-
-    // Animator parameters
-    private static readonly int InputMagnitude = Animator.StringToHash("InputMagnitude");
-    private static readonly int IsMoving = Animator.StringToHash("IsMoving");
-    private static readonly int IsJumping = Animator.StringToHash("IsJumping");
-    private static readonly int IsGrounded = Animator.StringToHash("IsGrounded");
-    private static readonly int IsFalling = Animator.StringToHash("IsFalling");
+    private float _ySpeed;
 
     private void Start()
     {
@@ -77,7 +76,7 @@ public class ThirdPersonController2 : MonoBehaviour
         }
 
         _ySpeed += gravity * Time.deltaTime;
-        
+
         SetSlopeSlideVelocity();
         if (_slopeSlideVelocity == Vector3.zero)
         {
@@ -102,10 +101,27 @@ public class ThirdPersonController2 : MonoBehaviour
             // make sure the character is still pushing down into the ground
             Vector3 velocity = _slopeSlideVelocity;
             velocity.y = _ySpeed;
-            
+
             // make sure character moves at the same speed regardless of the framerate
             _characterController.Move(velocity * Time.deltaTime);
         }
+    }
+
+    private void OnAnimatorMove()
+    {
+        if (_isGrounded && _isSliding == false)
+        {
+            Vector3 velocity = _animator.deltaPosition;
+            velocity.y = _ySpeed * Time.deltaTime;
+            _characterController.Move(velocity);
+        }
+    }
+
+    /// Hide the mouse cursor when the application gets focused
+    /// <param name="focus"> </param>
+    private void OnApplicationFocus(bool focus)
+    {
+        Cursor.lockState = focus ? CursorLockMode.Locked : CursorLockMode.None;
     }
 
     private Vector3 AdjustVelocityToSlope(Vector3 velocity)
@@ -148,9 +164,9 @@ public class ThirdPersonController2 : MonoBehaviour
             {
                 _isSliding = true;
             }
-            
+
             _characterController.stepOffset = _originalStepOffset;
-            
+
             if (_isSliding == false)
             {
                 _ySpeed = -0.5f;
@@ -165,7 +181,7 @@ public class ThirdPersonController2 : MonoBehaviour
 
             // The time that has passed since the jump button has been pressed
             var hasJumpedRecently = Time.time - _jumpButtonPressedTime <= jumpButtonGracePeriod && _isSliding == false;
-            
+
             // Check if player has jumped recently
             if (hasJumpedRecently)
             {
@@ -186,7 +202,7 @@ public class ThirdPersonController2 : MonoBehaviour
             _animator.SetBool(IsGrounded, _isGrounded);
 
             // If player is falling, we don't want falling animation when player is going down hill or stairs
-            var isFalling = _isJumping && _ySpeed < 0 || _ySpeed < -2;
+            var isFalling = (_isJumping && _ySpeed < 0) || _ySpeed < -2;
             var isFallingFromPlatform = CheckIfFalling();
             if (isFalling && isFallingFromPlatform)
             {
@@ -233,7 +249,7 @@ public class ThirdPersonController2 : MonoBehaviour
         {
             // Vector coming out of the ground's surface
             Vector3 groundVector = hitInfo.normal;
-            
+
             // Get the angle of the slope
             var angle = Vector3.Angle(groundVector, Vector3.up);
 
@@ -241,7 +257,7 @@ public class ThirdPersonController2 : MonoBehaviour
             if (angle >= _characterController.slopeLimit)
             {
                 var downwardCharacterVelocity = new Vector3(0, _ySpeed, 0);
-                
+
                 // Slide the character downwards based on the direction the character is facing
                 _slopeSlideVelocity = Vector3.ProjectOnPlane(downwardCharacterVelocity, groundVector);
                 return;
@@ -252,31 +268,14 @@ public class ThirdPersonController2 : MonoBehaviour
         {
             // Bring the slide to a gradual stop
             _slopeSlideVelocity -= 3 * Time.deltaTime * _slopeSlideVelocity;
-            
+
             if (_slopeSlideVelocity.sqrMagnitude > 1)
             {
                 return;
             }
         }
-        
+
         // If character is not on any ground isn't steep enough to require a slide, set to zero
         _slopeSlideVelocity = Vector3.zero;
-    }
-    
-    private void OnAnimatorMove()
-    {
-        if (_isGrounded && _isSliding == false)
-        {
-            Vector3 velocity = _animator.deltaPosition;
-            velocity.y = _ySpeed * Time.deltaTime;
-            _characterController.Move(velocity);
-        }
-    }
-
-    /// Hide the mouse cursor when the application gets focused
-    /// <param name="focus"></param>
-    private void OnApplicationFocus(bool focus)
-    {
-        Cursor.lockState = focus ? CursorLockMode.Locked : CursorLockMode.None;
     }
 }
