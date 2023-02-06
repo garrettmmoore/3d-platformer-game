@@ -12,7 +12,7 @@ public class MovingPlatform : MonoBehaviour
 
     /// The time that has elapsed for the moving platform.
     private float _elapsedTime;
-    
+
 
     private Transform _previousWaypoint;
     private Transform _targetWaypoint;
@@ -28,17 +28,36 @@ public class MovingPlatform : MonoBehaviour
         TargetNextWaypoint();
     }
 
-    private void Update()
+    // Use fixed update to remove jitter when character jumps on the platform
+    private void FixedUpdate()
     {
         _elapsedTime += Time.deltaTime;
 
         var elapsedPercentage = _elapsedTime / _timeToWaypoint;
+
+        // Add smoothing to the platform movement so it is slower at the beginning and the end
+        elapsedPercentage = Mathf.SmoothStep(0, 1, elapsedPercentage);
+
         transform.position = Vector3.Lerp(_previousWaypoint.position, _targetWaypoint.position, elapsedPercentage);
+
+        // Allow platform rotation to change based on the rotation of the way points
+        transform.rotation = Quaternion.Lerp(_previousWaypoint.rotation, _targetWaypoint.rotation, elapsedPercentage);
 
         if (elapsedPercentage >= 1)
         {
             TargetNextWaypoint();
         }
+    }
+
+    // Set the character as a child of the platform so the character moves with the platform
+    private void OnTriggerEnter(Collider other)
+    {
+        other.transform.SetParent(transform);
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        other.transform.SetParent(null);
     }
 
     /// Target the next waypoints in the path.
