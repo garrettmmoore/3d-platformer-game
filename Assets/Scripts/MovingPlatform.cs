@@ -13,7 +13,6 @@ public class MovingPlatform : MonoBehaviour
     /// The time that has elapsed for the moving platform.
     private float _elapsedTime;
 
-
     private Transform _previousWaypoint;
     private Transform _targetWaypoint;
 
@@ -52,12 +51,12 @@ public class MovingPlatform : MonoBehaviour
     // Set the character as a child of the platform so the character moves with the platform
     private void OnTriggerEnter(Collider other)
     {
-        other.transform.SetParent(transform);
+        other.transform.SetParent(transform, true);
     }
 
     private void OnTriggerExit(Collider other)
     {
-        other.transform.SetParent(null);
+        other.transform.SetParent(null, true);
     }
 
     /// Target the next waypoints in the path.

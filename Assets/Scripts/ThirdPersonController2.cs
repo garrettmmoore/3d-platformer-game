@@ -130,7 +130,6 @@ public class ThirdPersonController2 : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hitInfo, 0.2f))
         {
-            Debug.Log("Hit adjust velocity to slope!");
             Quaternion slopeRotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
             Vector3 adjustedVelocity = slopeRotation * velocity;
             if (adjustedVelocity.y < 0)
