@@ -30,6 +30,9 @@ public class ThirdPersonController2 : MonoBehaviour
     [SerializeField]
     private float fallDistance;
 
+    [SerializeField]
+    private float xSpeed = 10;
+
     private Animator _animator;
     private CharacterController _characterController;
     private bool _isGrounded;
@@ -62,8 +65,8 @@ public class ThirdPersonController2 : MonoBehaviour
         // Update the animation transition based on movement of the thumbstick
         _animator.SetFloat(InputMagnitude, inputMagnitude, 0.05f, Time.deltaTime);
 
+        // Handle camera rotation and normalize the vector as a direction vector should have a magnitude of 1
         movementDirection = Quaternion.AngleAxis(cameraTransform.rotation.eulerAngles.y, Vector3.up) * movementDirection;
-        // We normalize the vector as a direction vector should have a magnitude of 1
         movementDirection.Normalize();
 
         // Implement gravity to make the jump less floaty
@@ -77,15 +80,16 @@ public class ThirdPersonController2 : MonoBehaviour
 
         _ySpeed += gravity * Time.deltaTime;
 
-        SetSlopeSlideVelocity();
-        if (_slopeSlideVelocity == Vector3.zero)
+        // Increase running speed
+        if (_isGrounded && _isSliding == false && (Input.GetButton("Fire1") || Input.GetKey(KeyCode.LeftControl)))
         {
-            _isSliding = false;
+            Vector3 velocity = movementDirection * (inputMagnitude * xSpeed);
+            velocity = AdjustVelocityToSlope(velocity);
+            _characterController.Move(velocity * Time.deltaTime);
         }
 
+        SetSlopeSlideVelocity();
         HandleCharacterJump(gravity);
-
-        // Turn/rotate the character to face the direction it's moving
         HandleCharacterRotation(movementDirection);
 
         if (_isGrounded == false && _isSliding == false)
@@ -130,7 +134,6 @@ public class ThirdPersonController2 : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hitInfo, 0.2f))
         {
-            Debug.Log("Hit adjust velocity to slope!");
             Quaternion slopeRotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
             Vector3 adjustedVelocity = slopeRotation * velocity;
             if (adjustedVelocity.y < 0)
@@ -142,6 +145,8 @@ public class ThirdPersonController2 : MonoBehaviour
         return velocity;
     }
 
+    /// Turn/rotate the character to face the direction it's moving
+    /// <param name="gravity"> The gravity of the movement direction. </param>
     private void HandleCharacterJump(float gravity)
     {
         if (_characterController.isGrounded)
@@ -277,5 +282,6 @@ public class ThirdPersonController2 : MonoBehaviour
 
         // If character is not on any ground isn't steep enough to require a slide, set to zero
         _slopeSlideVelocity = Vector3.zero;
+        _isSliding = false;
     }
 }
