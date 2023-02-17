@@ -81,7 +81,7 @@ public class ThirdPersonController2 : MonoBehaviour
         _ySpeed += gravity * Time.deltaTime;
 
         // Increase running speed
-        if (_isGrounded && _isSliding == false && Input.GetButton("Fire1"))
+        if (_isGrounded && _isSliding == false && (Input.GetButton("Fire1") || Input.GetKey(KeyCode.LeftControl)))
         {
             Vector3 velocity = movementDirection * (inputMagnitude * xSpeed);
             velocity = AdjustVelocityToSlope(velocity);
