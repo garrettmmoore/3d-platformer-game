@@ -21,7 +21,7 @@
             {
                 "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
                 "key": "buildOutputDirList",
-                "value": "{\"m_Value\":\"C:/Users/Garrett/Game Dev/Game Builds/Four_Corners/Four_Corners_WebGL;C:/Users/Garrett/Game Dev/Game Builds/Four_Corners_Alpha_WebGL;;;;;;;;\"}"
+                "value": "{\"m_Value\":\"C:/Users/Garrett/Game Dev/Game Builds/Four_Corners/Four_Corners_WebGL_0.2;C:/Users/Garrett/Game Dev/Game Builds/Four_Corners/Four_Corners_WebGL;C:/Users/Garrett/Game Dev/Game Builds/Four_Corners_Alpha_WebGL;;;;;;;\"}"
             }
         ]
     }
