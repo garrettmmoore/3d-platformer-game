@@ -2,14 +2,13 @@ using UnityEngine;
 using UnityEngine.Events;
 
 public class PlayerInventory : MonoBehaviour
-{ 
+{
+    public UnityEvent<PlayerInventory> onDiamondCollected;
     public int NumberOfDiamonds { get; private set; }
-
-    public UnityEvent<PlayerInventory> OnDiamondCollected;
 
     public void DiamondCollected()
     {
         NumberOfDiamonds++;
-        OnDiamondCollected.Invoke(this);
+        onDiamondCollected.Invoke(this);
     }
 }

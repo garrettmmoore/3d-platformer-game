@@ -3,17 +3,17 @@ using UnityEngine;
 
 public class InventoryUI : MonoBehaviour
 {
-    private TextMeshProUGUI diamondText;
+    private TextMeshProUGUI _diamondText;
 
     private void Start()
     {
-        diamondText = GetComponent<TextMeshProUGUI>();
+        _diamondText = GetComponent<TextMeshProUGUI>();
     }
-    
+
     /// Update the diamond text with the current number of diamonds in the player's inventory.
-    /// <param name="playerInventory"></param>
+    /// <param name="playerInventory"> </param>
     public void UpdateDiamondText(PlayerInventory playerInventory)
     {
-        diamondText.text = playerInventory.NumberOfDiamonds.ToString();
+        _diamondText.text = playerInventory.NumberOfDiamonds.ToString();
     }
 }

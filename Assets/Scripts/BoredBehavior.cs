@@ -2,20 +2,23 @@ using UnityEngine;
 
 public class BoredBehavior : StateMachineBehaviour
 {
-    [SerializeField] private float _timeUntilBored;
-    [SerializeField] private int _numberOfBoredAnimations;
+    // The value of the animation parameter
+    private static readonly int BoredAnimation = Animator.StringToHash("BoredAnimation");
 
-    // Keep track of whether the character is currently bored
-    private bool _isBored;
+    [SerializeField]
+    private float timeUntilBored;
 
-    // Keep track of how long the character has been idle
-    private float _idleTime;
+    [SerializeField]
+    private int numberOfBoredAnimations;
 
     // The animation we want to transition to
     private int _boredAnimation;
 
-    // The value of the animation parameter
-    private static readonly int BoredAnimation = Animator.StringToHash("BoredAnimation");
+    // Keep track of how long the character has been idle
+    private float _idleTime;
+
+    // Keep track of whether the character is currently bored
+    private bool _isBored;
 
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -39,12 +42,12 @@ public class BoredBehavior : StateMachineBehaviour
 
             // Check if character has been idle long enough to become bored
             // Only change if we are at the beginning of an animation
-            if (_idleTime > _timeUntilBored && stateInfo.normalizedTime % 1 < 0.02f)
+            if (_idleTime > timeUntilBored && stateInfo.normalizedTime % 1 < 0.02f)
             {
                 _isBored = true;
 
                 // Get the right random bored animation
-                _boredAnimation = Random.Range(1, _numberOfBoredAnimations + 1);
+                _boredAnimation = Random.Range(1, numberOfBoredAnimations + 1);
                 _boredAnimation = _boredAnimation * 2 - 1;
 
                 // Set the animation parameter to the closet "Default Idle" animation
@@ -71,7 +74,7 @@ public class BoredBehavior : StateMachineBehaviour
             // Go back to the previous default idle animation
             _boredAnimation--;
         }
-        
+
         _isBored = false;
         _idleTime = 0;
     }

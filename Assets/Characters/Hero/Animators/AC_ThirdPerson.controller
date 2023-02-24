@@ -121,8 +121,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 575adc43a17f9a247bf8c58afff8be24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _timeUntilBored: 3
-  _numberOfBoredAnimations: 3
+  timeUntilBored: 3
+  numberOfBoredAnimations: 3
 --- !u!206 &-3013087649557866123
 BlendTree:
   m_ObjectHideFlags: 1

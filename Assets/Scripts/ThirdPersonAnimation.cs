@@ -2,11 +2,9 @@ using UnityEngine;
 
 public class ThirdPersonAnimation : MonoBehaviour
 {
+    private static readonly int Speed = Animator.StringToHash("speed");
     private Animator _animator;
     private Rigidbody _rb;
-    private const float MaxSpeed = 5f;
-    private const float DampTime = 0.05f;
-    private static readonly int Speed = Animator.StringToHash("speed");
 
     private void Start()
     {
@@ -21,10 +19,8 @@ public class ThirdPersonAnimation : MonoBehaviour
         var movementDirection = new Vector3(horizontalInput, 0, verticalInput);
         var speed = Mathf.Clamp01(movementDirection.magnitude);
         _animator.SetFloat(Speed, speed, 0.05f, Time.deltaTime);
-        // var speed = _rb.velocity.magnitude / MaxSpeed;
-        // _animator.SetFloat(Speed, speed, DampTime, Time.deltaTime);
     }
-    
+
     private void OnAnimatorMove()
     {
         Debug.Log("Animator Moved!");
@@ -32,5 +28,4 @@ public class ThirdPersonAnimation : MonoBehaviour
         velocity.y = _rb.velocity.y * Time.deltaTime;
         _rb.AddForce(velocity);
     }
-
 }
