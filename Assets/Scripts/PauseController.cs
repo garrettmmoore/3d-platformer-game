@@ -17,11 +17,13 @@ public class PauseController : MonoBehaviour
             if (_isPaused)
             {
                 Time.timeScale = 0;
+                Singleton<CanvasManager>.GetInstance().SwitchScreen(ScreenType.EndScreen);
                 gamePaused.Invoke();
             }
             else
             {
                 Time.timeScale = 1;
+                Singleton<CanvasManager>.GetInstance().SwitchScreen(ScreenType.GameUI);
                 gameResumed.Invoke();
             }
         }
