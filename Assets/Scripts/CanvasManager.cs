@@ -5,9 +5,10 @@ using UnityEngine;
 /// Identifiers for UI screens.
 public enum ScreenType
 {
-    MainMenu,
+    EndScreen,
     GameUI,
-    EndScreen
+    MainMenu,
+    PauseMenu
 }
 
 /// A script to manage and control all interactions with Canvas UI.
@@ -15,6 +16,7 @@ public enum ScreenType
 public class CanvasManager : Singleton<CanvasManager>
 {
     private ScreenController _lastActiveScreen;
+    private PauseController _pauseController;
 
     // A list of scripts from the child objects (screens) of the canvas
     private List<ScreenController> _screenControllers;
@@ -25,6 +27,7 @@ public class CanvasManager : Singleton<CanvasManager>
         _screenControllers = GetComponentsInChildren<ScreenController>().ToList();
         _screenControllers = GetComponentsInChildren<ScreenController>().ToList();
         _screenControllers.ForEach(x => x.gameObject.SetActive(false));
+        _pauseController = Singleton<PauseController>.GetInstance();
 
         // All of our screens are active so we want to deactivate them all except for the main menu
         SwitchScreen(ScreenType.MainMenu);
@@ -41,6 +44,12 @@ public class CanvasManager : Singleton<CanvasManager>
 
         if (desiredScreen != null)
         {
+            // Unpause the game on resume
+            if (desiredScreen.screenType == ScreenType.GameUI && _pauseController.isPaused)
+            {
+                _pauseController.HandlePause();
+            }
+
             desiredScreen.gameObject.SetActive(true);
             _lastActiveScreen = desiredScreen;
         }
