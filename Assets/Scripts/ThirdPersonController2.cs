@@ -81,7 +81,7 @@ public class ThirdPersonController2 : MonoBehaviour
         _ySpeed += gravity * Time.deltaTime;
 
         // Increase running speed
-        if (_isGrounded && _isSliding == false && (Input.GetButton("Fire1") || Input.GetMouseButton(2)))
+        if (_isGrounded && _isSliding == false && (Input.GetButton("Run") || Input.GetMouseButton(2)))
         {
             Vector3 velocity = movementDirection * (inputMagnitude * xSpeed);
             velocity = AdjustVelocityToSlope(velocity);
@@ -121,11 +121,11 @@ public class ThirdPersonController2 : MonoBehaviour
         }
     }
 
-    /// Hide the mouse cursor when the application gets focused
-    /// <param name="focus"> </param>
+    // /// Hide the mouse cursor when the application gets focused
+    // /// <param name="focus"> </param>
     private void OnApplicationFocus(bool focus)
     {
-        Cursor.lockState = focus ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.lockState = focus ? CursorLockMode.Confined : CursorLockMode.None;
     }
 
     private Vector3 AdjustVelocityToSlope(Vector3 velocity)
@@ -145,7 +145,6 @@ public class ThirdPersonController2 : MonoBehaviour
         return velocity;
     }
 
-    /// Turn/rotate the character to face the direction it's moving
     /// <param name="gravity"> The gravity of the movement direction. </param>
     private void HandleCharacterJump(float gravity)
     {
@@ -216,6 +215,7 @@ public class ThirdPersonController2 : MonoBehaviour
         }
     }
 
+    /// Turn/rotate the character to face the direction it's moving
     private void HandleCharacterRotation(Vector3 movementDirection)
     {
         if (movementDirection != Vector3.zero)
