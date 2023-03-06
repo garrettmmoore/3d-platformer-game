@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Button))]
@@ -7,7 +6,6 @@ public class ScreenSwitcher : MonoBehaviour
 {
     public ScreenType desiredScreenType;
     private CanvasManager _canvasManager;
-    private EventSystem _eventSystem;
     private Button _menuButton;
 
     // Start is called before the first frame update
@@ -16,7 +14,6 @@ public class ScreenSwitcher : MonoBehaviour
         _menuButton = GetComponent<Button>();
         _menuButton.onClick.AddListener(OnButtonClick);
         _canvasManager = Singleton<CanvasManager>.GetInstance();
-        _eventSystem = GetComponent<EventSystem>();
     }
 
     // Update is called once per frame
