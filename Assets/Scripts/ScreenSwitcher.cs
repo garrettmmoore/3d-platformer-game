@@ -8,13 +8,14 @@ public class ScreenSwitcher : MonoBehaviour, IPointerEnterHandler
     public ScreenType desiredScreenType;
     private CanvasManager _canvasManager;
     private Button _menuButton;
+    private PauseController _pauseController;
 
-    // Start is called before the first frame update
     private void Start()
     {
         _menuButton = GetComponent<Button>();
         _menuButton.onClick.AddListener(OnButtonClick);
         _canvasManager = Singleton<CanvasManager>.GetInstance();
+        _pauseController = Singleton<PauseController>.GetInstance();
     }
 
     /// Select button on mouse hover
@@ -28,9 +29,15 @@ public class ScreenSwitcher : MonoBehaviour, IPointerEnterHandler
         }
     }
 
-    // Update is called once per frame
     private void OnButtonClick()
     {
-        _canvasManager.SwitchScreen(desiredScreenType);
+        if (desiredScreenType == ScreenType.GameUI && _pauseController.isPaused)
+        {
+            _pauseController.HandlePause();
+        }
+        else
+        {
+            _canvasManager.SwitchScreen(desiredScreenType);
+        }
     }
 }

@@ -16,23 +16,21 @@ public enum ScreenType
 public class CanvasManager : Singleton<CanvasManager>
 {
     private ScreenController _lastActiveScreen;
-    private PauseController _pauseController;
 
     // A list of scripts from the child objects (screens) of the canvas
     private List<ScreenController> _screenControllers;
 
+    // Deactivate all screens except for the main menu
     protected override void Awake()
     {
         base.Awake();
-        _screenControllers = GetComponentsInChildren<ScreenController>().ToList();
-        _screenControllers = GetComponentsInChildren<ScreenController>().ToList();
+        _screenControllers = GetComponentsInChildren<ScreenController>(true).ToList();
         _screenControllers.ForEach(x => x.gameObject.SetActive(false));
-        _pauseController = Singleton<PauseController>.GetInstance();
-
-        // All of our screens are active so we want to deactivate them all except for the main menu
         SwitchScreen(ScreenType.MainMenu);
     }
 
+    /// Switch to the specified UI screen.
+    /// <param name="screenType"> The type of screen to switch to. </param>
     public void SwitchScreen(ScreenType screenType)
     {
         if (_lastActiveScreen != null)
@@ -44,12 +42,6 @@ public class CanvasManager : Singleton<CanvasManager>
 
         if (desiredScreen != null)
         {
-            // Unpause the game on resume
-            if (desiredScreen.screenType == ScreenType.GameUI && _pauseController.isPaused)
-            {
-                _pauseController.HandlePause();
-            }
-
             desiredScreen.gameObject.SetActive(true);
             _lastActiveScreen = desiredScreen;
         }
